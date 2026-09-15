@@ -1,0 +1,212 @@
+import React from 'react';
+import { RiskBadge, PredictionBadge } from './RiskBadge';
+
+export function TransactionDetails({ tx, onClose, onBlock, onMarkSafe, isDocked = false }) {
+  if (!tx) return null;
+
+  const formattedAmount = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(tx.amount);
+
+  const fraudPercent = (tx.fraud_probability * 100).toFixed(1);
+  const anomalyPercent = (tx.anomaly_score * 100).toFixed(1);
+  const isCritical = tx.risk_level === 'CRITICAL';
+  const isHigh = tx.risk_level === 'HIGH';
+
+  // Segmented visual bar (10 segments)
+  const segments = Array.from({ length: 10 }).map((_, i) => {
+    const threshold = (i + 1) * 0.1;
+    const isActive = tx.fraud_probability >= threshold - 0.05;
+    let color = '#10b981'; // green
+    if (i >= 4) color = '#f59e0b'; // yellow/amber
+    if (i >= 7) color = '#ea580c'; // orange
+    if (i >= 8) color = '#dc2626'; // red
+    return { isActive, color };
+  });
+
+  const content = (
+    <div className="docked-details-card">
+      {/* Header */}
+      <div className="details-card-header">
+        <div className="details-header-title-group">
+          <div className="details-kicker-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>TRANSACTION DETAILS</span>
+          </div>
+          <div className="details-tx-headline">
+            <span className="details-tx-id">{tx.transaction_id}</span>
+            <span className={`details-tag-flag ${tx.prediction === 'FRAUD' ? 'tag-fraud' : 'tag-legit'}`}>
+              {tx.prediction || 'FRAUD'}
+            </span>
+            {isCritical && (
+              <span className="details-tag-quarantine">QUARANTINED</span>
+            )}
+          </div>
+        </div>
+
+        {onClose && (
+          <button className="details-close-btn" onClick={onClose} aria-label="Close details">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      <div className="details-card-body">
+        {/* Top Flagged Amount Hero Box */}
+        <div className="flagged-amount-box">
+          <div className="amount-headline-row">
+            <div className="amount-label-wrap">
+              <span className="flagged-label">FLAGGED AMOUNT</span>
+              <span className="flagged-sub">Pre-authorization rule active</span>
+            </div>
+            <span className="flagged-hero-amount">{formattedAmount}</span>
+          </div>
+
+          <div className="prob-meter-section">
+            <div className="prob-text-row">
+              <span className="prob-label">
+                <span className="square-dot" /> Fraud Probability
+              </span>
+              <span className="prob-badge">{fraudPercent}%</span>
+            </div>
+
+            {/* Segmented Gradient Bar */}
+            <div className="segmented-gauge">
+              {segments.map((seg, idx) => (
+                <div
+                  key={idx}
+                  className={`gauge-segment ${seg.isActive ? 'active' : 'inactive'}`}
+                  style={{ backgroundColor: seg.isActive ? seg.color : '#e2e8f0' }}
+                />
+              ))}
+            </div>
+
+            <div className="score-sub-row">
+              <span className="sub-stat">Anomaly Score: <strong>{anomalyPercent}%</strong></span>
+              <span className="sub-stat">Risk Level: <strong className={isCritical ? 'text-critical' : ''}>{tx.risk_level}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Context Key-Values */}
+        <div className="context-spec-table">
+          <div className="context-spec-row">
+            <span className="spec-key">Merchant</span>
+            <span className="spec-val font-semibold">{tx.merchant}</span>
+          </div>
+
+          <div className="context-spec-row">
+            <span className="spec-key">Geographic Origin</span>
+            <span className="spec-val location-pin-val">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {tx.location}
+            </span>
+          </div>
+
+          <div className="context-spec-row">
+            <span className="spec-key">Device Identity</span>
+            <span className="spec-val">
+              {tx.device === 'new_device' ? (
+                <span className="device-mismatch-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M12 2a10 10 0 0 0-10 10c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69" />
+                  </svg>
+                  Fingerprint Mismatch
+                </span>
+              ) : (
+                <span className="device-normal-badge">Verified Device ({tx.device})</span>
+              )}
+            </span>
+          </div>
+
+          <div className="context-spec-row">
+            <span className="spec-key">Payment Instrument</span>
+            <span className="spec-val card-token-val">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              {tx.payment_method} (Visa ** 4242)
+            </span>
+          </div>
+
+          <div className="context-spec-row">
+            <span className="spec-key">Velocity Bucket</span>
+            <span className="velocity-pill">3 TX / 30s</span>
+          </div>
+        </div>
+
+        {/* Why was this flagged? (Explainability Box) */}
+        <div className="flagged-reasons-card">
+          <div className="reasons-header">
+            <div className="reasons-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              WHY WAS THIS FLAGGED?
+            </div>
+            <span className="confidence-pill">HIGH CONFIDENCE</span>
+          </div>
+
+          <ul className="reasons-bullet-list">
+            {(!tx.explanation || tx.explanation.length === 0) ? (
+              <li className="reason-bullet safe-bullet">
+                ✓ No anomalous indicators found. Fits established baseline.
+              </li>
+            ) : (
+              tx.explanation.map((item, idx) => (
+                <li key={idx} className="reason-bullet">
+                  <span className="red-dot-bullet">•</span>
+                  <span>{item}</span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        {/* Recommended Actions */}
+        <div className="details-actions-bar">
+          <button className="btn-block-tx" onClick={() => onBlock && onBlock(tx)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
+            Block TX
+          </button>
+          <button className="btn-safe-tx" onClick={() => onMarkSafe && onMarkSafe(tx)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Mark as Safe
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isDocked) {
+    return <div className="details-docked-wrapper">{content}</div>;
+  }
+
+  return (
+    <div className="drawer-overlay" onClick={onClose}>
+      <aside className="drawer-panel" onClick={(e) => e.stopPropagation()}>
+        {content}
+      </aside>
+    </div>
+  );
+}
