@@ -1,29 +1,24 @@
 import React, { useState } from 'react';
 
-export function ActivityChart({ transactions = [] }) {
+export function ActivityChart({ transactions = [], selectedTx = null }) {
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
-  // Take the last 7 transactions or mock points to show dynamic activity peaks
+  // Take the last 7 transactions
   const recentPoints = transactions.slice(0, 7).reverse();
 
-  // If few transactions, use nice stylized waveform points
-  const points = recentPoints.length >= 4 
-    ? recentPoints.map((tx, idx) => ({
-        x: 20 + idx * 45,
-        y: Math.max(25, 100 - (tx.risk_score || tx.fraud_probability || 0.15) * 80),
-        score: Math.round((tx.risk_score || tx.fraud_probability || 0.15) * 100),
-        id: tx.transaction_id || `TX-${idx}`,
-        time: tx.timestamp ? tx.timestamp.slice(11, 16) : `T-${7 - idx}m`
-      }))
-    : [
-        { x: 20, y: 92, score: 8, id: 'TX-1001', time: 'T-5m' },
-        { x: 65, y: 85, score: 18, id: 'TX-1002', time: 'T-4m' },
-        { x: 115, y: 78, score: 24, id: 'TX-1003', time: 'T-3m' },
-        { x: 165, y: 60, score: 48, id: 'TX-1004', time: 'T-2m' },
-        { x: 215, y: 80, score: 22, id: 'TX-1005', time: 'T-1m' },
-        { x: 265, y: 40, score: 72, id: 'TX-1006', time: 'T-30s' },
-        { x: 300, y: 32, score: 94, id: 'TX-1007', time: 'NOW' }
-      ];
+  // If selectedTx is provided and not in recent, prepend/include it
+  const points = recentPoints.map((tx, idx) => {
+    const isSelected = selectedTx && selectedTx.transaction_id === tx.transaction_id;
+    const scoreVal = Math.round(((tx.risk_score != null ? tx.risk_score : tx.fraud_probability) || 0.15) * 100);
+    return {
+      x: 20 + idx * 45,
+      y: Math.max(20, 100 - (scoreVal / 100) * 80),
+      score: scoreVal,
+      id: tx.transaction_id || `TX-${idx}`,
+      time: tx.timestamp ? tx.timestamp.slice(11, 16) : `T-${7 - idx}m`,
+      isSelected
+    };
+  });
 
   // Build SVG path
   const pathD = points.reduce((acc, pt, i) => {
@@ -78,20 +73,26 @@ export function ActivityChart({ transactions = [] }) {
           {points.map((pt, idx) => {
             const isAlert = pt.score >= 50;
             const isHovered = hoveredPoint && hoveredPoint.id === pt.id;
+            const isSelected = pt.isSelected;
             return (
               <g key={idx} style={{ cursor: 'pointer' }} onMouseEnter={() => setHoveredPoint(pt)} onMouseLeave={() => setHoveredPoint(null)}>
+                {isSelected && (
+                  <circle cx={pt.x} cy={pt.y} r="12" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeDasharray="3 3">
+                    <animateTransform attributeName="transform" type="rotate" from={`0 ${pt.x} ${pt.y}`} to={`360 ${pt.x} ${pt.y}`} dur="4s" repeatCount="indefinite" />
+                  </circle>
+                )}
                 <circle
                   cx={pt.x}
                   cy={pt.y}
-                  r={isHovered ? 6 : (isAlert ? 4.5 : 3.5)}
-                  fill={isAlert ? '#dc2626' : '#2563eb'}
+                  r={isSelected ? 7 : (isHovered ? 6 : (isAlert ? 4.5 : 3.5))}
+                  fill={isSelected ? '#38bdf8' : (isAlert ? '#dc2626' : '#2563eb')}
                   stroke="#ffffff"
                   strokeWidth="2"
-                  style={{ transition: 'r 0.2s' }}
+                  style={{ transition: 'all 0.2s' }}
                 />
-                {isAlert && idx === points.length - 1 && (
-                  <circle cx={pt.x} cy={pt.y} r="8" fill="none" stroke="#dc2626" strokeWidth="1.5" opacity="0.6">
-                    <animate attributeName="r" values="5;14" dur="1.5s" repeatCount="indefinite" />
+                {(isAlert || isSelected) && (
+                  <circle cx={pt.x} cy={pt.y} r={isSelected ? 14 : 8} fill="none" stroke={isSelected ? '#38bdf8' : '#dc2626'} strokeWidth="1.5" opacity="0.6">
+                    <animate attributeName="r" values={isSelected ? "8;16" : "5;14"} dur="1.5s" repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0.8;0" dur="1.5s" repeatCount="indefinite" />
                   </circle>
                 )}

@@ -223,7 +223,7 @@ export function TransactionDetails({ tx, onClose, onBlock, onMarkSafe, isDocked 
         </div>
 
         {/* Recommended Actions */}
-        <div className="details-actions-bar">
+        <div className="details-actions-bar" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           <button className="btn-block-tx" onClick={() => onBlock && onBlock(tx)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="12" cy="12" r="10" />
@@ -238,6 +238,63 @@ export function TransactionDetails({ tx, onClose, onBlock, onMarkSafe, isDocked 
             Mark as Safe
           </button>
         </div>
+
+        {/* Unique Feature: 1-Click Export Forensic Dossier */}
+        <button
+          type="button"
+          onClick={() => {
+            const dossier = {
+              incident_id: `INC-${tx.transaction_id}`,
+              timestamp: tx.timestamp || new Date().toISOString(),
+              target: {
+                amount: `INR ${tx.amount}`,
+                merchant: tx.merchant,
+                location: tx.location,
+                device: tx.device,
+                instrument: tx.payment_method
+              },
+              ml_verdict: {
+                prediction: tx.prediction,
+                risk_level: tx.risk_level,
+                fraud_probability: `${(tx.fraud_probability * 100).toFixed(1)}%`,
+                anomaly_score: `${(tx.anomaly_score * 100).toFixed(1)}%`,
+                explainability: tx.explanation || []
+              },
+              compliance_standard: "RBI / NPCI Cyber-Fraud Intercept Mandate v4.2"
+            };
+            const blob = new Blob([JSON.stringify(dossier, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Forensic_Dossier_${tx.transaction_id}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          style={{
+            marginTop: '10px',
+            width: '100%',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            background: 'rgba(30, 41, 59, 0.7)',
+            border: '1px solid #334155',
+            color: '#38bdf8',
+            fontSize: '11px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export Compliance Incident Dossier
+        </button>
       </div>
     </div>
   );
