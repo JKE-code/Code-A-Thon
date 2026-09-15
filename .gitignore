@@ -1,29 +1,59 @@
-# Virtual environment
-venv/
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.egg-info/
-*.egg
-dist/
+*.so
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# ML models (large binary files)
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.env
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# ML Models / Large artifacts
 ml_engine/models/*.pkl
+*.joblib
+!ml_engine/models/*.gitkeep
 
 # Dataset files
 *.csv
 ieee-fraud-detection/
 
-# IDE
-.vscode/
-.idea/
-
-# OS
-Thumbs.db
-.DS_Store
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
 
 # Kaggle cache
 .cache/
