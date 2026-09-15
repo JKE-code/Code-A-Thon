@@ -322,45 +322,95 @@ export function Payment({ onTransactionCreated, onNavigate }) {
                 </div>
 
                 <div className="form-group-wrap">
-                  <label className="field-label" htmlFor="pay-method">PAYMENT METHOD</label>
-                  <select
-                    id="pay-method"
-                    value={formData.payment_method}
-                    onChange={(e) => {
-                      setFormData((prev) => ({ ...prev, payment_method: e.target.value }));
-                      setSelectedScenario('custom');
-                    }}
-                    className="clean-field"
-                    style={{ background: 'var(--color-bg-secondary, #1e293b)', color: 'inherit' }}
-                  >
-                    <option value="UPI">UPI (Google Pay / PhonePe / Paytm)</option>
-                    <option value="CARD">Credit / Debit Card</option>
-                    <option value="NETBANKING">Net Banking</option>
-                  </select>
+                  <label className="field-label">PAYMENT METHOD</label>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[
+                      { id: 'UPI', label: 'UPI (GPay/PhonePe)', icon: '⚡' },
+                      { id: 'CARD', label: 'Credit/Debit Card', icon: '💳' },
+                      { id: 'NETBANKING', label: 'Net Banking', icon: '🏛️' }
+                    ].map((pm) => {
+                      const isSelected = formData.payment_method === pm.id;
+                      return (
+                        <button
+                          key={pm.id}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, payment_method: pm.id }));
+                            setSelectedScenario('custom');
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: '8px 6px',
+                            borderRadius: '6px',
+                            border: `1.5px solid ${isSelected ? '#2563eb' : '#cbd5e1'}`,
+                            background: isSelected ? '#eff6ff' : '#ffffff',
+                            color: isSelected ? '#1d4ed8' : '#334155',
+                            fontWeight: isSelected ? 700 : 500,
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span>{pm.icon}</span>
+                          <span>{pm.id}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
-              {/* Device Profile Selection */}
+              {/* Device Profile Selection — Crisp Interactive Cards */}
               <div className="form-group-wrap">
-                <label className="field-label" htmlFor="pay-device">DEVICE PROFILE</label>
-                <select
-                  id="pay-device"
-                  value={formData.device}
-                  onChange={(e) => {
-                    const dev = e.target.value;
-                    const fp = dev === 'new_device' 
-                      ? 'MacOS (Chrome) • Unrecognized Device' 
-                      : (dev === 'desktop' ? 'Windows 11 (Edge) • Known Desktop' : 'iOS 17 (Safari) • Verified Mobile');
-                    setFormData((prev) => ({ ...prev, device: dev, fingerprint: fp }));
-                    setSelectedScenario('custom');
-                  }}
-                  className="clean-field"
-                  style={{ background: 'var(--color-bg-secondary, #1e293b)', color: 'inherit' }}
-                >
-                  <option value="mobile">Verified Mobile Device (iOS / Android)</option>
-                  <option value="desktop">Known Desktop Workstation</option>
-                  <option value="new_device">New / Unrecognized Device (High Risk Signal)</option>
-                </select>
+                <label className="field-label">DEVICE PROFILE</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                  {[
+                    { id: 'mobile', label: 'Verified Mobile', sub: 'iOS / Android', fp: 'iOS 17 (Safari) • Verified Mobile', icon: '📱' },
+                    { id: 'desktop', label: 'Known Desktop', sub: 'Windows / Mac', fp: 'Windows 11 (Edge) • Known Desktop', icon: '💻' },
+                    { id: 'new_device', label: 'New / Spoofed Device', sub: 'High Risk Alert', fp: 'MacOS (Chrome) • Unrecognized Device', icon: '⚠️' }
+                  ].map((dev) => {
+                    const isSelected = formData.device === dev.id;
+                    const isHighRisk = dev.id === 'new_device';
+                    return (
+                      <button
+                        key={dev.id}
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({ ...prev, device: dev.id, fingerprint: dev.fp }));
+                          setSelectedScenario('custom');
+                        }}
+                        style={{
+                          padding: '10px 8px',
+                          borderRadius: '8px',
+                          border: `1.5px solid ${
+                            isSelected 
+                              ? (isHighRisk ? '#dc2626' : '#2563eb') 
+                              : '#cbd5e1'
+                          }`,
+                          background: isSelected 
+                            ? (isHighRisk ? '#fef2f2' : '#eff6ff') 
+                            : '#ffffff',
+                          color: isSelected 
+                            ? (isHighRisk ? '#b91c1c' : '#1d4ed8') 
+                            : '#334155',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <div style={{ fontSize: '16px', marginBottom: '2px' }}>{dev.icon}</div>
+                        <div style={{ fontWeight: 700, fontSize: '11px' }}>{dev.label}</div>
+                        <div style={{ fontSize: '10px', color: isSelected && isHighRisk ? '#ef4444' : '#64748b' }}>
+                          {dev.sub}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* CTA Button */}
