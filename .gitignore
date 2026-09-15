@@ -1,0 +1,29 @@
+# Virtual environment
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+
+# ML models (large binary files)
+ml_engine/models/*.pkl
+
+# Dataset files
+*.csv
+ieee-fraud-detection/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Kaggle cache
+.cache/
