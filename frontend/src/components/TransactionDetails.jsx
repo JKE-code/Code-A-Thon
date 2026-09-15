@@ -134,17 +134,61 @@ export function TransactionDetails({ tx, onClose, onBlock, onMarkSafe, isDocked 
           <div className="context-spec-row">
             <span className="spec-key">Payment Instrument</span>
             <span className="spec-val card-token-val">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                <line x1="1" y1="10" x2="23" y2="10" />
-              </svg>
-              {tx.payment_method} (Visa ** 4242)
+              {tx.payment_method}
+            </span>
+          </div>
+        </div>
+
+        {/* Customer Historical Pattern vs Current Transaction Analysis */}
+        <div style={{
+          marginTop: '14px',
+          padding: '12px',
+          borderRadius: '8px',
+          background: 'rgba(15, 23, 42, 0.6)',
+          border: '1px solid rgba(51, 65, 85, 0.8)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5">
+              <path d="M12 20v-6M6 20V10M18 20V4" />
+            </svg>
+            <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8' }}>
+              CUSTOMER BEHAVIORAL PROFILE COMPARISON
             </span>
           </div>
 
-          <div className="context-spec-row">
-            <span className="spec-key">Velocity Bucket</span>
-            <span className="velocity-pill">3 TX / 30s</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px' }}>
+            <div style={{ padding: '8px', borderRadius: '6px', background: 'rgba(30, 41, 59, 0.5)' }}>
+              <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Normal Baseline</span>
+              <strong style={{ color: '#10b981' }}>₹450 - ₹4,500</strong>
+              <div style={{ color: '#94a3b8', fontSize: '10px', marginTop: '2px' }}>Domestic • Trusted Mobile</div>
+            </div>
+
+            <div style={{ padding: '8px', borderRadius: '6px', background: 'rgba(30, 41, 59, 0.5)' }}>
+              <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Current Attempt</span>
+              <strong style={{ color: tx.amount > 10000 ? '#ef4444' : '#38bdf8' }}>
+                ₹{tx.amount?.toLocaleString()}
+              </strong>
+              <div style={{ color: '#94a3b8', fontSize: '10px', marginTop: '2px' }}>
+                {tx.location} • {tx.device}
+              </div>
+            </div>
+          </div>
+
+          {/* Anomaly verdict comparison tag */}
+          <div style={{
+            marginTop: '8px',
+            padding: '6px 8px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            background: tx.risk_level === 'CRITICAL' || tx.risk_level === 'HIGH' ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+            color: tx.risk_level === 'CRITICAL' || tx.risk_level === 'HIGH' ? '#fca5a5' : '#86efac',
+            border: `1px solid ${tx.risk_level === 'CRITICAL' || tx.risk_level === 'HIGH' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`
+          }}>
+            {tx.risk_level === 'CRITICAL' || tx.risk_level === 'HIGH' ? (
+              <span>⚠️ <strong>Anomaly Detected:</strong> Transaction diverges from the customer's typical spending baseline, device fingerprint, or geographic perimeter.</span>
+            ) : (
+              <span>✓ <strong>Within Baseline:</strong> Matches the customer's usual transaction velocity and authenticated device signature.</span>
+            )}
           </div>
         </div>
 
