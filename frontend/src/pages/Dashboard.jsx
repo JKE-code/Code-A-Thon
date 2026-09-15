@@ -227,8 +227,8 @@ export function Dashboard({ sharedTransactions, onNewTransaction, wsStatus, setW
       {/* 3 Bottom Charts */}
       <section className="secops-charts-row" aria-label="Analytical Telemetry">
         <FraudChart transactions={transactions} />
-        <RiskChart />
-        <ActivityChart />
+        <RiskChart transactions={transactions} />
+        <ActivityChart transactions={transactions} />
       </section>
 
       {/* Floating Alert Toast (bottom-right) */}
