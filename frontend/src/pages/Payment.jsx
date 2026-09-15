@@ -454,6 +454,91 @@ export function Payment({ onTransactionCreated, onNavigate }) {
             </div>
           </div>
 
+          {/* Visual Behavioral Pattern & Anomaly Analysis */}
+          <div style={{
+            margin: '14px 0',
+            padding: '14px',
+            borderRadius: '10px',
+            background: 'rgba(15, 23, 42, 0.6)',
+            border: '1px solid rgba(51, 65, 85, 0.8)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8' }}>
+                BEHAVIORAL ANOMALY RADAR
+              </span>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: verdict.status === 'BLOCKED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                color: verdict.status === 'BLOCKED' ? '#ef4444' : '#10b981'
+              }}>
+                {verdict.status === 'BLOCKED' ? 'ANOMALOUS SPIKE' : 'PERFECT / SAFE PAYMENT'}
+              </span>
+            </div>
+
+            {/* Visual Comparative Meters */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* Metric 1: Amount vs Baseline */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
+                  <span style={{ color: '#cbd5e1' }}>Amount vs Baseline (₹2,500 norm)</span>
+                  <strong style={{ color: parseFloat(formData.amount) > 10000 ? '#ef4444' : '#10b981' }}>
+                    ₹{parseInt(formData.amount || 0).toLocaleString()} ({parseFloat(formData.amount) > 10000 ? 'High Outlier' : 'Normal Spends'})
+                  </strong>
+                </div>
+                <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(100, Math.max(8, (parseFloat(formData.amount || 0) / 50000) * 100))}%`,
+                    background: parseFloat(formData.amount) > 10000 ? 'linear-gradient(90deg, #f59e0b, #ef4444)' : '#10b981',
+                    borderRadius: '3px',
+                    transition: 'width 0.4s ease'
+                  }} />
+                </div>
+              </div>
+
+              {/* Metric 2: Device Trust Index */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
+                  <span style={{ color: '#cbd5e1' }}>Device Authentication Trust</span>
+                  <strong style={{ color: formData.device === 'new_device' ? '#ef4444' : '#10b981' }}>
+                    {formData.device === 'new_device' ? '0% (Unrecognized / Spoofed)' : '98% (Authenticated Device)'}
+                  </strong>
+                </div>
+                <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: formData.device === 'new_device' ? '12%' : '98%',
+                    background: formData.device === 'new_device' ? '#ef4444' : '#10b981',
+                    borderRadius: '3px',
+                    transition: 'width 0.4s ease'
+                  }} />
+                </div>
+              </div>
+
+              {/* Metric 3: Geo Perimeter Alignment */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
+                  <span style={{ color: '#cbd5e1' }}>Geographic Perimeter Check</span>
+                  <strong style={{ color: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '#ef4444' : '#10b981' }}>
+                    {(formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? 'Foreign / High Risk' : 'Domestic Zone'}
+                  </strong>
+                </div>
+                <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '85%' : '15%',
+                    background: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '#ef4444' : '#10b981',
+                    borderRadius: '3px',
+                    transition: 'width 0.4s ease'
+                  }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* TRIGGERED RISK FACTORS */}
           <div className="risk-factors-container">
             <span className="section-micro-heading">EXPLAINABLE AI FACTORS</span>
