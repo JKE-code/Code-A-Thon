@@ -8,6 +8,8 @@ class TransactionRequest(BaseModel):
     location: str = Field(..., min_length=1, description="Transaction location")
     device: str = Field(..., min_length=1, description="Device identifier or type")
     payment_method: str = Field(..., min_length=1, description="Payment method (e.g. CARD, UPI)")
+    timing: Optional[str] = Field(None, description="Transaction time (e.g. 14:30 or 03:00)")
+    timestamp: Optional[str] = Field(None, description="Optional ISO timestamp")
 
 
 class TransactionResponse(BaseModel):

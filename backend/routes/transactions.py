@@ -30,11 +30,13 @@ def generate_transaction_id() -> str:
 
 def process_transaction(request_data: Dict[str, Any]) -> Dict[str, Any]:
     tx_id = generate_transaction_id()
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = request_data.get("timestamp") or datetime.now(timezone.utc).isoformat()
+    timing_val = request_data.get("timing") or ""
 
     tx_payload = {
         "transaction_id": tx_id,
         "timestamp": now_iso,
+        "timing": timing_val,
         "amount": request_data["amount"],
         "merchant": request_data["merchant"],
         "location": request_data["location"],
