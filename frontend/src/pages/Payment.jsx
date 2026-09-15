@@ -504,86 +504,135 @@ export function Payment({ onTransactionCreated, onNavigate }) {
             </div>
           </div>
 
-          {/* Visual Behavioral Pattern & Anomaly Analysis */}
+          {/* Visual Behavioral Pattern & Interactive Anomaly Gauge Chart */}
           <div style={{
             margin: '14px 0',
-            padding: '14px',
+            padding: '16px',
             borderRadius: '10px',
-            background: 'rgba(15, 23, 42, 0.6)',
-            border: '1px solid rgba(51, 65, 85, 0.8)'
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(51, 65, 85, 0.8)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', color: '#94a3b8' }}>
-                BEHAVIORAL ANOMALY RADAR
-              </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5">
+                  <path d="M12 20v-6M6 20V10M18 20V4" />
+                </svg>
+                <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#94a3b8' }}>
+                  ANOMALY PATTERN & THREAT VISUALIZER
+                </span>
+              </div>
               <span style={{
                 fontSize: '10px',
                 fontWeight: 700,
-                padding: '2px 8px',
+                padding: '3px 8px',
                 borderRadius: '4px',
-                background: verdict.status === 'BLOCKED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                color: verdict.status === 'BLOCKED' ? '#ef4444' : '#10b981'
+                background: verdict.status === 'BLOCKED' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.25)',
+                color: verdict.status === 'BLOCKED' ? '#ef4444' : '#10b981',
+                border: `1px solid ${verdict.status === 'BLOCKED' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`
               }}>
-                {verdict.status === 'BLOCKED' ? 'ANOMALOUS SPIKE' : 'PERFECT / SAFE PAYMENT'}
+                {verdict.status === 'BLOCKED' ? 'CRITICAL ANOMALY' : 'PERFECT / CLEAN PAYMENT'}
               </span>
             </div>
 
-            {/* Visual Comparative Meters */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {/* Metric 1: Amount vs Baseline */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
-                  <span style={{ color: '#cbd5e1' }}>Amount vs Baseline (₹2,500 norm)</span>
-                  <strong style={{ color: parseFloat(formData.amount) > 10000 ? '#ef4444' : '#10b981' }}>
-                    ₹{parseInt(formData.amount || 0).toLocaleString()} ({parseFloat(formData.amount) > 10000 ? 'High Outlier' : 'Normal Spends'})
-                  </strong>
-                </div>
-                <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${Math.min(100, Math.max(8, (parseFloat(formData.amount || 0) / 50000) * 100))}%`,
-                    background: parseFloat(formData.amount) > 10000 ? 'linear-gradient(90deg, #f59e0b, #ef4444)' : '#10b981',
-                    borderRadius: '3px',
-                    transition: 'width 0.4s ease'
-                  }} />
+            {/* Interactive Semi-Circular Gauge & Multi-Axis Bar Chart */}
+            <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '14px', alignItems: 'center' }}>
+              {/* Semi-Circle SVG Radial Gauge */}
+              <div style={{ position: 'relative', textAlign: 'center', width: '130px', height: '85px' }}>
+                <svg width="130" height="85" viewBox="0 0 130 85">
+                  {/* Gauge background arc */}
+                  <path
+                    d="M 15 75 A 50 50 0 0 1 115 75"
+                    fill="none"
+                    stroke="#334155"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                  />
+                  {/* Colored progress arc based on fraudLikelihood */}
+                  <path
+                    d="M 15 75 A 50 50 0 0 1 115 75"
+                    fill="none"
+                    stroke={verdict.status === 'BLOCKED' ? 'url(#gaugeRedGrad)' : '#10b981'}
+                    strokeWidth="12"
+                    strokeDasharray="157"
+                    strokeDashoffset={157 - (157 * Math.min(100, parseFloat(verdict.fraudLikelihood || 0))) / 100}
+                    strokeLinecap="round"
+                    style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+                  />
+                  <defs>
+                    <linearGradient id="gaugeRedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#ef4444" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div style={{ position: 'absolute', bottom: '6px', left: 0, right: 0 }}>
+                  <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'monospace', color: verdict.status === 'BLOCKED' ? '#ef4444' : '#10b981' }}>
+                    {verdict.fraudLikelihood}%
+                  </div>
+                  <div style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
+                    {verdict.status === 'BLOCKED' ? 'Fraud Threat' : 'Safe Index'}
+                  </div>
                 </div>
               </div>
 
-              {/* Metric 2: Device Trust Index */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
-                  <span style={{ color: '#cbd5e1' }}>Device Authentication Trust</span>
-                  <strong style={{ color: formData.device === 'new_device' ? '#ef4444' : '#10b981' }}>
-                    {formData.device === 'new_device' ? '0% (Unrecognized / Spoofed)' : '98% (Authenticated Device)'}
-                  </strong>
+              {/* 3 Parameter Comparative Visual Spectrum */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                {/* 1. Transaction Amount Spectrum */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#cbd5e1', marginBottom: '2px' }}>
+                    <span>Amount Magnitude</span>
+                    <strong style={{ color: parseFloat(formData.amount || 0) > 10000 ? '#ef4444' : '#10b981' }}>
+                      ₹{parseInt(formData.amount || 0).toLocaleString()} ({parseFloat(formData.amount || 0) > 10000 ? 'Outlier' : 'Normal'})
+                    </strong>
+                  </div>
+                  <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${Math.min(100, Math.max(8, (parseFloat(formData.amount || 0) / 75000) * 100))}%`,
+                      background: parseFloat(formData.amount || 0) > 10000 ? 'linear-gradient(90deg, #f59e0b, #ef4444)' : '#10b981',
+                      borderRadius: '3px',
+                      transition: 'width 0.4s ease'
+                    }} />
+                  </div>
                 </div>
-                <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: formData.device === 'new_device' ? '12%' : '98%',
-                    background: formData.device === 'new_device' ? '#ef4444' : '#10b981',
-                    borderRadius: '3px',
-                    transition: 'width 0.4s ease'
-                  }} />
-                </div>
-              </div>
 
-              {/* Metric 3: Geo Perimeter Alignment */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
-                  <span style={{ color: '#cbd5e1' }}>Geographic Perimeter Check</span>
-                  <strong style={{ color: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '#ef4444' : '#10b981' }}>
-                    {(formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? 'Foreign / High Risk' : 'Domestic Zone'}
-                  </strong>
+                {/* 2. Device Fingerprint Integrity */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#cbd5e1', marginBottom: '2px' }}>
+                    <span>Device Trust Integrity</span>
+                    <strong style={{ color: formData.device === 'new_device' ? '#ef4444' : '#10b981' }}>
+                      {formData.device === 'new_device' ? 'Mismatch (0%)' : 'Verified (98%)'}
+                    </strong>
+                  </div>
+                  <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: formData.device === 'new_device' ? '10%' : '98%',
+                      background: formData.device === 'new_device' ? '#ef4444' : '#10b981',
+                      borderRadius: '3px',
+                      transition: 'width 0.4s ease'
+                    }} />
+                  </div>
                 </div>
-                <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '85%' : '15%',
-                    background: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '#ef4444' : '#10b981',
-                    borderRadius: '3px',
-                    transition: 'width 0.4s ease'
-                  }} />
+
+                {/* 3. Geo-Perimeter Alignment */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#cbd5e1', marginBottom: '2px' }}>
+                    <span>Geographic Perimeter</span>
+                    <strong style={{ color: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '#ef4444' : '#10b981' }}>
+                      {(formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? 'High-Risk Zone' : 'Clear Domestic'}
+                    </strong>
+                  </div>
+                  <div style={{ height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '92%' : '14%',
+                      background: (formData.location || '').toLowerCase().includes('dubai') || (formData.location || '').toLowerCase().includes('london') ? '#ef4444' : '#10b981',
+                      borderRadius: '3px',
+                      transition: 'width 0.4s ease'
+                    }} />
+                  </div>
                 </div>
               </div>
             </div>
